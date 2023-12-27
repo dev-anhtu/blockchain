@@ -52,18 +52,38 @@ describe('Escrow', function () {
       await contract.connect(depositor).deposit(token, await recipient.getAddress(), parseEther('50'), ONE_YEAR_IN_SECS)
 
       //
-      const withdrawTime = (await time.latest()) + ONE_YEAR_IN_SECS - 1
-      await time.increaseTo(withdrawTime + 1000)
+      const withdrawTime = (await time.latest()) + ONE_YEAR_IN_SECS + 13
+      await time.increaseTo(withdrawTime)
       await expect(contract.connect(recipient).withdraw()).to.be.revertedWith('withdraw time is expired')
     })
 
-    it("should successful if withdraw time isn't expired yet", async () => {
+    it('should withdraw successfully', async () => {
       const { depositor, token, contract, recipient, ONE_YEAR_IN_SECS } = await loadFixture(deployOneYearLockFixture)
       token.connect(depositor).approve(await contract.getAddress(), parseEther('80'))
       await contract.connect(depositor).deposit(token, await recipient.getAddress(), parseEther('50'), ONE_YEAR_IN_SECS)
       //
       await contract.connect(recipient).withdraw()
       expect(await token.balanceOf(await recipient.getAddress())).to.equal(parseEther('50'))
+    })
+
+    it('should refund fail', async () => {
+      const { depositor, token, contract, recipient, ONE_YEAR_IN_SECS } = await loadFixture(deployOneYearLockFixture)
+      token.connect(depositor).approve(await contract.getAddress(), parseEther('80'))
+      await contract.connect(depositor).deposit(token, await recipient.getAddress(), parseEther('50'), ONE_YEAR_IN_SECS)
+      //
+      await expect(contract.connect(depositor).refund()).to.be.revertedWith('refund time must be in the past')
+    })
+
+    it('should refund successfully', async () => {
+      const { depositor, token, contract, recipient, ONE_YEAR_IN_SECS } = await loadFixture(deployOneYearLockFixture)
+      token.connect(depositor).approve(await contract.getAddress(), parseEther('80'))
+      await contract.connect(depositor).deposit(token, await recipient.getAddress(), parseEther('50'), ONE_YEAR_IN_SECS)
+
+      //
+      const withdrawTime = (await time.latest()) + ONE_YEAR_IN_SECS + 13
+      await time.increaseTo(withdrawTime)
+      await contract.connect(depositor).refund()
+      expect(await token.balanceOf(await depositor.getAddress())).to.equal(parseEther('100'))
     })
   })
 })

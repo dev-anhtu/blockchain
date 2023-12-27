@@ -39,14 +39,12 @@ contract Escrow {
     }
 
     function withdraw() external onlyRecipient {
-        console.log(block.timestamp);
-        console.log(withdrawTime);
         require(block.timestamp <= withdrawTime, 'withdraw time is expired');
         token.transfer(msg.sender, balance);
     }
 
     function refund() public onlyDepositor {
         require(block.timestamp > withdrawTime, 'refund time must be in the past');
-        token.transferFrom(address(this), depositor, balance);
+        token.transfer(msg.sender, balance);
     }
 }
