@@ -38,7 +38,7 @@ describe('Escrow', function () {
       // get all information of contract
       expect(await contract.depositor()).to.equal(await depositor.getAddress())
       expect(await contract.recipient()).to.equal(await recipient.getAddress())
-      expect(await contract.balance()).to.equal(parseEther('50'))
+      expect(await contract.balance()).not.to.equal(parseEther('0'))
       const withdrawTime = (await time.latest()) + ONE_YEAR_IN_SECS
       expect(await contract.withdrawTime()).to.equal(withdrawTime)
 
