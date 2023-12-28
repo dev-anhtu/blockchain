@@ -23,8 +23,6 @@ contract Swap {
         bnbAmount = _bnbAmount;
         usdtAmount = _usdtAmount;
 
-        console.log(bnbAmount);
-
         k = bnbAmount * usdtAmount;
     }
 
@@ -35,8 +33,12 @@ contract Swap {
         uint256 newBnbAmount = bnbAmount - _bnbAmount;
         uint256 _usdtAmount = (k / newBnbAmount) - usdtAmount;
 
-        usdtToken.transferFrom(msg.sender, address(this), _usdtAmount);
-        bnbToken.transferFrom(address(this), msg.sender, _bnbAmount);
+        console.log(usdtToken.balanceOf(msg.sender));
+        console.log(_usdtAmount);
+        usdtToken.transfer(address(this), _usdtAmount);
+        console.log(usdtToken.balanceOf(msg.sender));
+
+        bnbToken.transfer(msg.sender, _bnbAmount);
 
         usdtAmount = usdtAmount + _usdtAmount;
         bnbAmount = newBnbAmount;

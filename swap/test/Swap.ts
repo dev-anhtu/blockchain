@@ -16,16 +16,16 @@ describe('Swap', function () {
     const swapFactory = await ethers.getContractFactory('Swap')
     const contract = await swapFactory.deploy()
 
-    bnb.mint(account1, parseUnits('200', 8))
-    usdt.mint(account1, parseUnits('10000', 12))
+    bnb.transfer(account1, parseUnits('200', 8))
+    usdt.transfer(account1, parseUnits('30000', 12))
 
-    bnb.mint(account2, parseUnits('200', 8))
-    usdt.mint(account2, parseUnits('10000', 12))
+    bnb.transfer(account2, parseUnits('200', 8))
+    usdt.transfer(account2, parseUnits('10000', 12))
 
     bnb.approve(await contract.getAddress(), parseUnits('200', 8))
-    usdt.approve(await contract.getAddress(), parseUnits('10000', 12))
+    usdt.approve(await contract.getAddress(), parseUnits('30000', 12))
 
-    await contract.initialize(await bnb.getAddress(), await usdt.getAddress(), parseUnits('200', 8), parseUnits('10000', 12))
+    await contract.initialize(await bnb.getAddress(), await usdt.getAddress(), parseUnits('200', 8), parseUnits('30000', 12))
     return { contract, bnb, usdt, owner, account1, account2 }
   }
 
@@ -33,8 +33,8 @@ describe('Swap', function () {
     const { contract } = await loadFixture(deployTokenAndContract)
 
     expect(await contract.bnbAmount()).to.equal(parseUnits('200', 8))
-    expect(await contract.usdtAmount()).to.equal(parseUnits('10000', 12))
-    expect(await contract.k()).to.equal(parseUnits('200', 8) * parseUnits('10000', 12))
+    expect(await contract.usdtAmount()).to.equal(parseUnits('30000', 12))
+    expect(await contract.k()).to.equal(parseUnits('200', 8) * parseUnits('30000', 12))
   })
 
   it('should not enough bnb', async function () {
@@ -43,9 +43,8 @@ describe('Swap', function () {
   })
 
   it('should enough bnb', async function () {
-    const { bnb, usdt, contract, account1 } = await loadFixture(deployTokenAndContract)
-    // bnb.connect(account1).approve(contract.getAddress(), parseUnits('1', 8))
-    // usdt.connect(account1).approve(contract.getAddress(), parseUnits('10000', 12))
-    await expect(await contract.connect(account1).buy(parseUnits('1', 8))).not.to.be.reverted
+    const { bnb, owner, usdt, contract, account1 } = await loadFixture(deployTokenAndContract)
+    await contract.connect(account1).buy(parseUnits('1', 8))
+    expect(await bnb.balanceOf(account1.address)).to.equal(parseUnits('202', 8))
   })
 })
