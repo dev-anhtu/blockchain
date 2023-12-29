@@ -21,7 +21,7 @@ describe('Escrow', function () {
   }
 
   describe('Deployment', function () {
-    it('check token information', async function () {
+    it('should check token information', async function () {
       const { token, owner } = await loadFixture(deployOneYearLockFixture)
 
       expect(await token.name()).to.equal('Key')
@@ -30,19 +30,19 @@ describe('Escrow', function () {
       expect(await token.owner()).to.equal(owner.address)
     })
 
-    it('shoul successful after deposited', async function () {
+    it('should succeed after depositing', async function () {
       const { depositor, token, contract, recipient, ONE_YEAR_IN_SECS } = await loadFixture(deployOneYearLockFixture)
       token.connect(depositor).approve(await contract.getAddress(), parseEther('80'))
       await contract.connect(depositor).deposit(token, await recipient.getAddress(), parseEther('50'), ONE_YEAR_IN_SECS)
 
-      // get all information of contract
+      // get all information of the contract
       expect(await contract.depositor()).to.equal(await depositor.getAddress())
       expect(await contract.recipient()).to.equal(await recipient.getAddress())
       expect(await contract.balance()).not.to.equal(parseEther('0'))
       const withdrawTime = (await time.latest()) + ONE_YEAR_IN_SECS
       expect(await contract.withdrawTime()).to.equal(withdrawTime)
 
-      // check depositor balance after depositting
+      // check depositor balance after depositing
       expect(await token.balanceOf(await depositor.getAddress())).to.equal(parseEther('50'))
     })
 
