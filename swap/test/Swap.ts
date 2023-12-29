@@ -38,13 +38,13 @@ describe('Swap', function () {
     return { contract, bnb, usdt, owner, account1, account2 }
   })
 
-  it('init contract', async function () {
+  it('should initialize contract with correct balances', async function () {
     expect(await contract.bnbAmount()).to.equal(parseUnits('200', BNB_DECIMALS))
     expect(await contract.usdtAmount()).to.equal(parseUnits('30000', USDT_DECIMALS))
     expect(await contract.k()).to.equal(parseUnits('200', BNB_DECIMALS) * parseUnits('30000', USDT_DECIMALS))
   })
 
-  it('should transfer token', async function () {
+  it('should transfer tokens to another account', async function () {
     await bnb.connect(owner).transfer(account1.address, parseUnits('200', BNB_DECIMALS))
     await usdt.connect(owner).transfer(account1.address, parseUnits('30000', USDT_DECIMALS))
 
@@ -52,26 +52,19 @@ describe('Swap', function () {
     expect(await usdt.balanceOf(account1.address)).to.equal(parseUnits('30000', USDT_DECIMALS))
   })
 
-  it('should not enough bnb', async function () {
+  it('should revert when buying with not enough BNB', async function () {
     await expect(contract.connect(account1).buy(parseUnits('201', BNB_DECIMALS))).to.be.revertedWith('Not enough BNB')
   })
 
-  it('should usdt transfer not enough', async function () {
+  it('should revert when buying with not enough USDT', async function () {
     await expect(contract.connect(account1).buy(parseUnits('199', BNB_DECIMALS))).to.be.revertedWith(
       'Your USDT balance is not enough'
     )
   })
 
-  it('should succesfully', async function () {
+  it('should successfully execute a buy transaction', async function () {
     await contract.connect(account1).buy(parseUnits('1', BNB_DECIMALS))
     expect(await contract.bnbAmount()).to.equal(parseUnits('199', BNB_DECIMALS))
     expect(await bnb.balanceOf(account1.address)).to.equal(parseUnits('201', BNB_DECIMALS))
   })
-
-  // it('should enough bnb', async function () {
-  //   const { bnb, owner, usdt, contract, account1 } = await loadFixture(deployTokenAndContract)
-  //   await contract.connect(account1).buy(parseUnits('1', 8))
-  //   usdt.connect(account1).approve(await contract.getAddress(), parseUnits('10000', 12))
-  //   expect(await bnb.balanceOf(account1.address)).to.equal(parseUnits('201', 8))
-  // })
 })
