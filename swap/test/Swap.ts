@@ -63,6 +63,7 @@ describe('Swap', function () {
   })
 
   it('should successfully execute a buy transaction', async function () {
+    await usdt.connect(account1).approve(await contract.getAddress(), parseUnits('10000', USDT_DECIMALS))
     await contract.connect(account1).buy(parseUnits('1', BNB_DECIMALS))
     expect(await contract.bnbAmount()).to.equal(parseUnits('199', BNB_DECIMALS))
     expect(await bnb.balanceOf(account1.address)).to.equal(parseUnits('201', BNB_DECIMALS))
