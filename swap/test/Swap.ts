@@ -19,6 +19,10 @@ describe('Swap', function () {
   let account2: HardhatEthersSigner
 
   before(async function () {
+    await deployTokenAndContract()
+  })
+
+  async function deployTokenAndContract() {
     ;[owner, account1, account2] = await ethers.getSigners()
 
     const bnbFactory = await ethers.getContractFactory('Token')
@@ -36,7 +40,7 @@ describe('Swap', function () {
     await contract.connect(owner).fund(parseUnits('200', BNB_DECIMALS), parseUnits('30000', USDT_DECIMALS))
 
     return { contract, bnb, usdt, owner, account1, account2 }
-  })
+  }
 
   it('should initialize contract with correct balances', async function () {
     expect(await contract.bnbAmount()).to.equal(parseUnits('200', BNB_DECIMALS))
